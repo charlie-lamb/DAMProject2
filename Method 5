@@ -1,0 +1,101 @@
+# Method 5. If on the first roll, you roll a double and the category is available: keep the double and reroll the other die; if the category is unavailable: reroll the double if the other die is from an available category, or, if both categories are taken, reroll all 3 dice. If on the first roll of the round, the numbers are different - keep dice of the highest available category, reroll the other two. If on the final roll, the dice are all different, take score of lowest available category
+
+scores <- c()
+
+for (i in 1:10000){
+  score <- 0
+  cat <- c(1:6)
+  while (length(cat)>0){
+    x <- roll.dice(3)
+    if (sum(x==as.numeric(names(which.max(table(x)))))==2){
+      if (as.numeric(names(which.max(table(x)))) %in% cat){
+        pair <- as.numeric(names(which.max(table(x))))
+        score <- score + pair * 2
+        x <- roll.dice(1)
+        score <- score + pair * sum(x==pair)
+        cat <- cat[!cat %in% pair]
+      }
+      else {
+        x <- x[!x %in% as.numeric(names(which.max(table(x))))]
+        if (x[1] %in% cat){
+          max <- x[1]
+          score <- score + max
+          x <- roll.dice(2)
+          score <- score + max*sum(x==max)
+          cat <- cat[!cat %in% max]
+        }
+        else {
+          x <- roll.dice(3)
+          r <- maxscore.noreroll2(x,cat,score)
+          cat <- unlist(r[1])
+          score <- as.numeric(as.character(r[2]))
+        }
+      }
+    }
+    else if (sum(x==as.numeric(names(which.max(table(x)))))==3){
+      if (as.numeric(names(which.max(table(x)))) %in% cat){
+        trip <- as.numeric(names(which.max(table(x))))
+        score <- score + trip * 3
+        cat <- cat[!cat %in% trip]
+      }
+      else {
+        x <- roll.dice(3)
+        r <- maxscore.noreroll2(x,cat,score)
+        cat <- unlist(r[1])
+        score <- as.numeric(as.character(r[2]))
+      }
+    }
+    else {
+      if (max(x) %in% cat) {                
+        r <- maxscore.reroll(x,cat,score)
+        cat <- unlist(r[1])
+        score <- as.numeric(as.character(r[2]))
+      }
+      else {
+        x <- x[!x %in% max(x)]     
+        if (length(x) != 0){       
+          if (max(x) %in% cat) {
+            r <- maxscore.reroll(x,cat,score)
+            cat <- unlist(r[1])
+            score <- as.numeric(as.character(r[2]))
+          }
+          else {
+            x <- x[!x %in% max(x)]
+            if (length(x) != 0){
+              if (max(x) %in% cat) {
+                r <- maxscore.reroll(x,cat,score)
+                cat <- unlist(r[1])
+                score <- as.numeric(as.character(r[2]))
+              }
+              else {
+                x <- roll.dice(3)
+                r <- minscore.noreroll(x,cat,score)
+                cat <- unlist(r[1])
+                score <- as.numeric(as.character(r[2]))
+              }
+            }
+            else {
+              x <- roll.dice(3)
+              r <- minscore.noreroll(x,cat,score)
+              cat <- unlist(r[1])
+              score <- as.numeric(as.character(r[2]))
+            }
+          }
+        } 
+        else {
+          x <- roll.dice(3)
+          r <- minscore.noreroll(x,cat,score)
+          cat <- unlist(r[1])
+          score <- as.numeric(as.character(r[2]))
+        }
+      }
+    }
+  }
+  scores[i] <- score
+}
+
+avgscore <- mean(scores)
+variance <- var(scores)
+varpop <- var.pop(scores)
+
+write.csv(scores,"Crag9.csv")
