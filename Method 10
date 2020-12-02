@@ -1,0 +1,66 @@
+# Method 10. Same as 4 on 1-5 then different
+
+scores <- c()
+for (i in 1:10000){
+  score <- 0
+  cat <- c(1:6)
+  while (length(cat)>1){
+    x <- roll.dice(3)
+    if (sum(x==as.numeric(names(which.max(table(x)))))==2 && as.numeric(names(which.max(table(x)))) %in% cat) {
+      pair <- as.numeric(names(which.max(table(x))))
+      score <- score + pair*sum(x==pair)
+      x <- roll.dice(1)
+      score <- score + pair*sum(x==pair)
+      cat <- cat[!cat %in% pair]
+    }
+    else if (sum(x==as.numeric(names(which.max(table(x)))))==3 && as.numeric(names(which.max(table(x)))) %in% cat) {
+      trip <- as.numeric(names(which.max(table(x))))
+      score <- score + trip*sum(x==trip)
+      cat <- cat[!cat %in% trip]
+    }
+    else {
+      x <- roll.dice(3)
+      if (sum(x==as.numeric(names(which.max(table(x)))))==2 && as.numeric(names(which.max(table(x)))) %in% cat) {
+        pair <- as.numeric(names(which.max(table(x))))
+        score <- score + pair*sum(x==pair)
+        cat <- cat[!cat %in% pair]
+      }
+      else if (sum(x==as.numeric(names(which.max(table(x)))))==3 && as.numeric(names(which.max(table(x)))) %in% cat) {
+        trip <- as.numeric(names(which.max(table(x))))
+        score <- score + trip*sum(x==trip)
+        cat <- cat[!cat %in% trip]
+      }
+      else {
+        r <- minscore.noreroll(x,cat,score)
+        cat <- unlist(r[1])
+        score <- as.numeric(as.character(r[2]))
+      }
+    }
+  }
+  x <- roll.dice(3)
+  if (cat[1] %in% x) {
+    max <- cat[1]
+    score <- score + sum(x==cat[1])*max
+    if (sum(x==cat[1])==1) {
+      x <- roll.dice(2)
+      score <- score + sum(x==max)*max
+    }
+    else if (sum(x==max)==2) {
+      x <- roll.dice(1)
+      score <- score + sum(x==max)*max
+    }
+  }
+  else {
+    x <- roll.dice(3)
+    r <- maxscore.noreroll(x,cat,score)
+    cat <- unlist(r[1])
+    score <- as.numeric(as.character(r[2]))
+  }
+  scores[i] <- score
+}
+
+avgscore <- mean(scores)
+variance <- var(scores)
+varpop <- var.pop(scores)
+
+write.csv(scores, "Crag14.csv")
