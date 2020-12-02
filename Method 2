@@ -1,0 +1,99 @@
+# Method 2. On the first roll, keep the highest value die/dice from available categories; reroll others then choose to fill category with highest available score (i.e. if final result was (3,3,4) choose to fill 3s category with score 6) 
+
+maxscore.reroll <- function(x,cat,score){
+  max <- max(x)
+  prescore1 <- max*sum(x==max) 
+  if (sum(x==max)==1){
+    x <- roll.dice(2)
+    prescore1 <- prescore1 + max*sum(x==max)
+    prescore2 <- max(x)*sum(x==max(x))
+    if (prescore1 > prescore2) {
+      score <- score + prescore1
+    }
+    else if (prescore2 > prescore1 && max(x) %in% cat) {
+      score <- score + prescore2
+      max <- max(x)
+    }
+    else {
+      score <- score + prescore1
+    }
+  }
+  else if (sum(x==max)==2){
+    x <- roll.dice(1)
+    prescore1 <- prescore1 + max*sum(x==max)
+    if (prescore1 > x[1]){
+      score <- score + prescore1
+    }
+    else if (x[1] > prescore1 && x[1] %in% cat) {
+      score <- score + x[1]
+      max <- x[1]
+    }
+    else {
+      score <- score + prescore1
+    }
+  }
+  else if (sum(x==max)==3){
+    score <- score + 3*max
+  }
+  cat <- cat[!cat %in% max]
+  return(list(cat,score))
+}
+
+scores <- c()
+for (i in 1:3) {
+  cat <- c(1:6)
+  score <- 0
+  while (length(cat) > 0)  {          
+    x <- roll.dice(3)
+    if (max(x) %in% cat) {                
+      r <- maxscore.reroll(x,cat,score)
+      cat <- unlist(r[1])
+      score <- as.numeric(as.character(r[2]))
+      
+    }
+    else {
+      x <- x[!x %in% max(x)]     
+      if (length(x) != 0){       
+        if (max(x) %in% cat) {
+          r <- maxscore.reroll(x,cat,score)
+          cat <- unlist(r[1])
+          score <- as.numeric(as.character(r[2]))
+        }
+        else {
+          x <- x[!x %in% max(x)]
+          if (length(x) != 0){
+            if (max(x) %in% cat) {
+              r <- maxscore.reroll(x,cat,score)
+              cat <- unlist(r[1])
+              score <- as.numeric(as.character(r[2]))
+            }
+            else {
+              x <- roll.dice(3)
+              r <- maxscore.noreroll(x,cat,score)
+              cat <- unlist(r[1])
+              score <- as.numeric(as.character(r[2]))
+            }
+          }
+          else {
+            x <- roll.dice(3)
+            r <- maxscore.noreroll(x,cat,score)
+            cat <- unlist(r[1])
+            score <- as.numeric(as.character(r[2]))
+          }
+        }
+      } 
+      else {
+        x <- roll.dice(3)
+        r <- maxscore.noreroll(x,cat,score)
+        cat <- unlist(r[1])
+        score <- as.numeric(as.character(r[2]))
+      }
+    }
+  }
+  scores[i] <- score
+}
+avgscore <- mean(scores)
+variance <- var(scores)
+varpop <- var.pop(scores)
+
+write.csv(scores, "Crag4.csv")
