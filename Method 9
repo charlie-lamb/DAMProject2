@@ -1,4 +1,4 @@
-# Method 9. Same as 7 on rounds 1-5 then look for a specific dice on round 6
+# Method 9. Same as 3 on rounds 1-5 then look for a specific dice on round 6
 
 scores <- c()
 for (i in 1:10000){
