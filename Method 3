@@ -1,0 +1,47 @@
+# Method 3. If on the first roll: roll triple - keep triple (unless category taken, then reroll all); if double - keep double and reroll other die (unless category taken, then reroll all); if numbers are different - reroll all dice. On the final roll if a triple or pair is rolled then choose these first; if the numbers are different choose the highest available score.
+
+scores <- c()
+for (i in 1:10000){
+  score <- 0
+  cat <- c(1:6)
+  while (length(cat)>0){
+    x <- roll.dice(3)
+    if (sum(x==as.numeric(names(which.max(table(x)))))==2 && as.numeric(names(which.max(table(x)))) %in% cat) {
+      pair <- as.numeric(names(which.max(table(x))))
+      score <- score + pair*sum(x==pair)
+      x <- roll.dice(1)
+      score <- score + pair*sum(x==pair)
+      cat <- cat[!cat %in% pair]
+    }
+    else if (sum(x==as.numeric(names(which.max(table(x)))))==3 && as.numeric(names(which.max(table(x)))) %in% cat) {
+      trip <- as.numeric(names(which.max(table(x))))
+      score <- score + trip*sum(x==trip)
+      cat <- cat[!cat %in% trip]
+    }
+    else{
+      x <- roll.dice(3)
+      if (sum(x==as.numeric(names(which.max(table(x)))))==2 && as.numeric(names(which.max(table(x)))) %in% cat) {
+        pair <- as.numeric(names(which.max(table(x))))
+        score <- score + pair*sum(x==pair)
+        cat <- cat[!cat %in% pair]
+      }
+      else if (sum(x==as.numeric(names(which.max(table(x)))))==3 && as.numeric(names(which.max(table(x)))) %in% cat) {
+        trip <- as.numeric(names(which.max(table(x))))
+        score <- score + trip*sum(x==trip)
+        cat <- cat[!cat %in% trip]
+      }
+      else {
+        r <- maxscore.noreroll2(x,cat,score)
+        cat <- unlist(r[1])
+        score <- as.numeric(as.character(r[2]))
+      }
+    }
+  }
+  scores[i] <- score
+}
+
+avgscore <- mean(scores)
+variance <- var(scores)
+varpop <- var.pop(scores)
+
+write.csv(scores,"Crag7.csv")
